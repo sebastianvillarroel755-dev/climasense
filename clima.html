@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClimaSense - Sistema de Monitoreo Agrícola</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #00d4ff;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 6rem 2rem;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(0, 255, 136, 0.15) 0%, transparent 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(0,212,255,0.1)"/></svg>');
+            animation: float 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-100px) translateX(50px); }
+        }
+        
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glow 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.4); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #b0b8c8;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0a0e27;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+            animation: pulse-button 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-button {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(0, 255, 136, 0.6); }
+        }
+
+        .cta-button:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 255, 136, 0.6);
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border-radius: 20px;
+            margin: 3rem 0;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            color: #00ff88;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            color: #b0b8c8;
+            margin-bottom: 2rem;
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .hero-icon img {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px rgba(0, 255, 136, 0.4));
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin: 4rem 0;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #00d4ff;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            font-size: 3rem;
+        }
+
+        /* Mission & Vision Grid */
+        .mv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .mv-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 255, 0.05) 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .mv-card:hover {
+            transform: scale(1.05);
+            border-color: #00d4ff;
+        }
+
+        .mv-card h3 {
+            font-size: 2rem;
+            color: #00ff88;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mv-card p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #b0b8c8;
+        }
+
+        /* Sensors Section */
+        .sensors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .sensor-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+            animation: pulse-rotate 4s linear infinite;
+        }
+
+        @keyframes pulse-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-10px);
+            border-color: #00d4ff;
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .sensor-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sensor-card h3 {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sensor-card p {
+            color: #b0b8c8;
+            line-height: 1.8;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sensor-detail {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid #00d4ff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sensor-detail strong {
+            color: #00ff88;
+        }
+
+        /* Team Section */
+        .team-intro {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #b0b8c8;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .team-member {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            transition: all 0.3s;
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #00ff88;
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .member-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: rotate-gradient 3s linear infinite;
+            overflow: hidden;
+            border: 3px solid rgba(0, 255, 136, 0.5);
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        @keyframes rotate-gradient {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .member-name {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .member-role {
+            color: #00ff88;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .member-bio {
+            color: #b0b8c8;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 153, 255, 0.1) 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #b0b8c8;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            margin-top: 4rem;
+            border-top: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        footer p {
+            color: #b0b8c8;
+            margin: 0.5rem 0;
+        }
+
+        .footer-highlight {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .nav-links { gap: 1rem; font-size: 0.9rem; }
+            .section { padding: 2rem; }
+            .section h2 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">🌱 ClimaSense</div>
+            <ul class="nav-links">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#mision-vision">Misión y Visión</a></li>
+                <li><a href="#sensores">Sensores</a></li>
+                <li><a href="#equipo">Equipo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="hero" id="inicio">
+        <div class="hero-icon"><img src="logoclimasense.jpg" alt="ClimaSense Logo"></div>
+        <h1>ClimaSense</h1>
+        <p class="hero-subtitle">Sistema monitoreado con Arduino Uno Q/ESP32</p>
+    </div>
+
+    <div class="container">
+        <!-- Misión y Visión -->
+        <div class="section" id="mision-vision">
+            <h2><span class="section-icon">🎯</span>Misión y Visión</h2>
+            
+            <div class="mv-grid">
+                <div class="mv-card">
+                    <h3>🚀 Misión</h3>
+                    <p>
+                        Desarrollar soluciones tecnológicas accesibles y eficientes para el monitoreo de condiciones ambientales en la agricultura boliviana, proporcionando a los agricultores herramientas precisas para la toma de decisiones informadas que mejoren la productividad y sostenibilidad de sus cultivos mediante el uso de sensores inteligentes y análisis de datos en tiempo real.
+                    </p>
+                </div>
+
+                <div class="mv-card">
+                    <h3>🔭 Visión</h3>
+                    <p>
+                        Ser líderes en innovación agrícola tecnológica en Bolivia, transformando las prácticas agrícolas tradicionales mediante la implementación de sistemas IoT (Internet de las Cosas) que democraticen el acceso a tecnología de precisión, contribuyendo al desarrollo sostenible del sector agrícola nacional y mejorando la calidad de vida de las comunidades rurales.
+                    </p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">10 min</div>
+                    <div class="stat-label">Analisis de Datos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Monitoreo Continuo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">AI Based</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Posibilidades</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sensores -->
+        <div class="section" id="sensores">
+            <h2><span class="section-icon">📡</span>Sensores monitoreados por IA</h2>
+            
+            <div style="text-align: center; margin-bottom: 3rem; color: #b0b8c8; font-size: 1.2rem;">
+                <p>Sensores monitoreados por IA que mide en tiempo real las condiciones críticas para la agricultura</p>
+            </div>
+
+            <div class="sensors-grid">
+                <div class="sensor-card">
+                    <div class="sensor-icon">🌡️</div>
+                    <h3>Sensor de Temperatura</h3>
+                    <p>
+                        Nuestro sistema Arduino incorpora sensores de temperatura de alta precisión que monitorean constantemente las condiciones térmicas del ambiente agrícola.
+                    </p>
+                    <div class="sensor-detail">
+                        <p><strong>¿Qué mide?</strong></p>
+                        <p>Temperatura ambiente en grados Celsius (°C) con una precisión de ±0.5°C</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>¿Por qué es importante?</strong></p>
+                        <p>La temperatura óptima (15-30°C) es crucial para la germinación de semillas y el crecimiento saludable de las plantas. Temperaturas extremas pueden afectar negativamente el desarrollo de los cultivos.</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>Aplicaciones:</strong></p>
+                        <p>Detecta heladas, olas de calor, y determina los mejores momentos para siembra y cosecha.</p>
+                    </div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">💧</div>
+                    <h3>Sensor de Humedad</h3>
+                    <p>
+                        Sistema dual de medición de humedad ambiental y del suelo implementado con Arduino para un control completo de las condiciones hídricas.
+                    </p>
+                    <div class="sensor-detail">
+                        <p><strong>¿Qué mide?</strong></p>
+                        <p>Humedad relativa del aire (%) y humedad del suelo (%) mediante sensores capacitivos y resistivos</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>¿Por qué es importante?</strong></p>
+                        <p>La humedad adecuada (50-70% aire, 55-75% suelo) previene enfermedades, optimiza la absorción de nutrientes y asegura una germinación exitosa. Niveles incorrectos pueden causar estrés hídrico o pudrición de raíces.</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>Aplicaciones:</strong></p>
+                        <p>Programación inteligente de riego, prevención de sequías, detección de exceso de agua, y optimización del uso de recursos hídricos.</p>
+                    </div>
+                </div>
+
+                <div class="sensor-card">
+                    <div class="sensor-icon">⚡</div>
+                    <h3>Sistema de Procesamiento</h3>
+                    <p>
+                        Sensores monitoreados por IA, procesa datos en tiempo real y genera alertas inteligentes.
+                    </p>
+                    <div class="sensor-detail">
+                        <p><strong>Características:</strong></p>
+                        <p>Microcontrolador Arduino Uno Q/ESP32, lectura cada 10 minutos, Datos transmitidos al Usuario</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>Funcionalidades:</strong></p>
+                        <p>Cálculo de índices de confort, detección de condiciones óptimas para siembra, generación de alertas por condiciones adversas, y registro histórico de datos.</p>
+                    </div>
+                    <div class="sensor-detail">
+                        <p><strong>Conectividad:</strong></p>
+                        <p>Módulo WiFi/Bluetooth para transmisión de datos a dispositivos móviles y computadoras para análisis avanzado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; padding: 2rem; background: rgba(0, 212, 255, 0.1); border-radius: 15px; border: 2px solid rgba(0, 212, 255, 0.3);">
+                <h3 style="color: #00ff88; text-align: center; margin-bottom: 1.5rem; font-size: 1.8rem;">🔧 Especificaciones Técnicas</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; color: #b0b8c8; font-size: 1.05rem;">
+                    <div>
+                        <strong style="color: #00d4ff;">Plataforma:</strong> Arduino Uno Q/ESP32
+                    </div>
+                    <div>
+                        <strong style="color: #00d4ff;">Frecuencia de Muestreo:</strong> Cada 10 minutos
+                    </div>
+                    <div>
+                        <strong style="color: #00d4ff;">Alimentación:</strong> Mediante Paneles solares
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Equipo -->
+        <div class="section" id="equipo">
+            <h2><span class="section-icon"></span>Nuestro Equipo</h2>
+            
+            <div class="team-intro">
+                <p>
+                    Somos un grupo de estudiantes apasionados por la tecnología y la agricultura, comprometidos con el desarrollo de soluciones innovadoras que beneficien a nuestra comunidad. 
+                    Nuestro equipo combina conocimientos en electrónica, programación y agronomía para crear herramientas que marquen la diferencia.
+                </p>
+
+            </div>
+
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-avatar"><img src="Mamani.jpg" alt="Integrante 1"></div>
+                    <div class="member-name">Jose Andres Mamani Cuiza</div>
+                    <p class="member-bio">
+                        joseandres.mc@gmail.com
+                    </p>
+                    <div class="member-role">Ganador del 2º lugar en la competencia Space Apps</div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-avatar"><img src="Villarroel.jpg" alt="Integrante 3"></div>
+                    <div class="member-name">Sebastian Rodolfo Villarroel Roncal</div>
+                    <p class="member-bio">
+                        sebastianrodolfo.vr@gmail.com
+                    </p>
+                    <div class="member-role">Ganador del 2º lugar en la competencia Space Apps</div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-avatar"><img src="Grover.jpg" alt="Integrante 3"></div>
+                    <div class="member-name">Juan Grover Castelo Ayaviri</div>
+                    <p class="member-bio">
+                        juan.castelo.ayaviri@gmail.com
+                    </p>
+                    <div class="member-role">Ganador del 2º lugar en la competencia Space Apps</div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-avatar"><img src="Mateo.jpg" alt="Integrante 2"></div>
+                    <div class="member-name">Mateo Garvizu Coca</div>
+                    <p class="member-bio">
+                        mgarvizu.c@gmail.com
+                    </p>
+                    <div class="member-role">Ganador del 2º lugar en la competencia Space Apps</div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-avatar"><img src="pelaez.jpg" alt="Integrante 3"></div>
+                    <div class="member-name">Andrés Daniel Pelaez Palma</div>
+                    <p class="member-bio">
+                        a.pelaez.palma@gmail.com
+                    </p>
+                    <div class="member-role">Ganador del 2º lugar en la competencia Space Apps</div>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%); border-radius: 15px; border: 2px solid rgba(0, 255, 136, 0.3); text-align: center;">
+                <h3 style="color: #00ff88; margin-bottom: 1rem; font-size: 1.8rem;">Información del Proyecto</h3>
+                <div style="color: #b0b8c8; font-size: 1.1rem; line-height: 1.8;">
+                    <p><strong style="color: #00d4ff;">Contactanos:</strong> climasense.team@gmail.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipo -->
+
+        <!-- Call to Action Final -->
+        <div class="cta-section">
+            <h2>🚀 Explora el Sistema en Acción</h2>
+            <p>Descubre cómo ClimaSense monitorea en tiempo real las condiciones agrícolas de tu región</p>
+            <a href="interfazdos.html" class="cta-button">🌡️ Acceder al Monitor de Clima 💧</a>
+        </div>
+
+    <footer>
+        <p style="font-size: 1.5rem; margin-bottom: 1rem;">ClimaSense</p>
+        <p>© 2025 ClimaSense - Sistema de Monitoreo Agrícola</p>
+        <p class="footer-highlight">Tecnología Arduino para la Agricultura Inteligente</p>
+        <p style="margin-top: 1rem; color: #00ff88;">Desarrollado por Jose Andres Mamani Cuiza y Sebastian Rodolfo Villarroel Roncal</p>
+    </footer>
+
+    <script>
+        // Navegación suave
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Animación de entrada para las tarjetas
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section, .sensor-card, .team-member, .mv-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

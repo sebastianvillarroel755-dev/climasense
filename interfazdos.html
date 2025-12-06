@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSentinel - Monitoreo Agrícola Inteligente</title>
+    <link rel="icon" href="climsense.jpeg" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #2d572c;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .location-info {
+            background-color: #e9f7e9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .map-section {
+            flex: 2;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .data-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #2d572c;
+            font-size: 1.3rem;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        #map {
+            height: 450px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        .scanning-info {
+            display: flex;
+            align-items: center;
+            padding: 15px 22px;
+            background-color: #f0f9ff;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .scanning-info i {
+            color: #2d572c;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .sensor-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+        
+        .sensor-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            transition: transform 0.2s;
+        }
+        
+        .sensor-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sensor-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .temp-icon { color: #e63946; }
+        .humidity-icon { color: #1d3557; }
+        .soil-icon { color: #6a040f; }
+        .wind-icon { color: #2a9d8f; }
+        
+        .sensor-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .sensor-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .sensor-unit {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .forecast-section {
+            margin-top: 10px;
+        }
+        
+        .forecast-days {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 10px;
+        }
+        
+        .forecast-day {
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .day-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .forecast-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #2a9d8f;
+        }
+        
+        .forecast-temp {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .forecast-condition {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+        }
+        
+        .alert-section {
+            margin-top: 25px;
+        }
+        
+        .alert-container {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
+        }
+        
+        .alert-active {
+            display: block;
+        }
+        
+        .fire-alert {
+            background-color: #ffebee;
+            border-left: 5px solid #d32f2f;
+        }
+        
+        .rain-alert {
+            background-color: #e3f2fd;
+            border-left: 5px solid #1976d2;
+        }
+        
+        .storm-alert {
+            background-color: #f3e5f5;
+            border-left: 5px solid #7b1fa2;
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .alert-icon {
+            font-size: 1.8rem;
+            margin-right: 15px;
+        }
+        
+        .fire-alert .alert-icon { color: #d32f2f; }
+        .rain-alert .alert-icon { color: #1976d2; }
+        .storm-alert .alert-icon { color: #7b1fa2; }
+        
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .alert-message {
+            line-height: 1.5;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .scanning {
+            background-color: #4caf50;
+            animation: blink 1.5s infinite;
+        }
+        
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 3px;
+        }
+        
+        .cultivo-color {
+            background-color: #4caf50;
+        }
+        
+        .bosque-color {
+            background-color: #2d572c;
+        }
+        
+        .camino-color {
+            background-color: #8b4513;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .update-frequency {
+            color: #4caf50;
+            font-weight: 500;
+        }
+        
+        .no-alerts {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .forecast-days {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .forecast-day {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tractor"></i> Climasense - Monitoreo Agrícola Inteligente</h1>
+            <p class="subtitle">Escaneo climático inteligente para prevenir incendios y proteger cultivos</p>
+            <div class="location-info">
+                <i class="fas fa-map-marker-alt"></i> Ubicación: Zona Agrícola Norte, Departamento de Santa Cruz, Bolivia
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <section class="map-section">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-map-marked-alt"></i> Zona Agrícola Monitoreada</h2>
+                    <div id="map"></div>
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <div class="legend-color cultivo-color"></div>
+                            <span>Área de cultivos</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color bosque-color"></div>
+                            <span>Bosque / Vegetación</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color camino-color"></div>
+                            <span>Caminos rurales</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="scanning-info">
+                    <i class="fas fa-satellite"></i>
+                    <span>Escaneando 500 hectáreas de zona agrícola en tiempo real</span>
+                    <div class="status-indicator">
+                        <span class="status-dot scanning"></span>
+                        <span>ACTIVO</span>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="data-section">
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-thermometer-half"></i> Datos de Sensores</h2>
+                    <div class="sensor-data">
+                        <div class="sensor-item">
+                            <div class="sensor-icon temp-icon">
+                                <i class="fas fa-thermometer-full"></i>
+                            </div>
+                            <div class="sensor-value" id="temperature">26.8</div>
+                            <div class="sensor-label">Temperatura</div>
+                            <div class="sensor-unit">°C</div>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div class="sensor-icon humidity-icon">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="sensor-value" id="air-humidity">58</div>
+                            <div class="sensor-label">Humedad del Aire</div>
+                            <div class="sensor-unit">%</div>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div class="sensor-icon soil-icon">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div class="sensor-value" id="soil-humidity">47</div>
+                            <div class="sensor-label">Humedad del Suelo</div>
+                            <div class="sensor-unit">%</div>
+                        </div>
+                        
+                        <div class="sensor-item">
+                            <div class="sensor-icon wind-icon">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div class="sensor-value" id="wind-speed">15</div>
+                            <div class="sensor-label">Velocidad del Viento</div>
+                            <div class="sensor-unit">km/h</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-calendar-week"></i> Pronóstico Semanal</h2>
+                    <div class="forecast-days" id="forecast-container">
+                        <!-- Los días del pronóstico se cargarán con JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <div class="alert-section">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-exclamation-triangle"></i> Alertas para Cultivos</h2>
+                <div id="alert-container">
+                    <!-- Las alertas se mostrarán aquí cuando sea necesario -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>EcoSentinel - Sistema de monitoreo agrícola | Última actualización: <span id="last-update"></span></p>
+            <p>Los datos de sensores se actualizan automáticamente cada <span class="update-frequency">10 segundos</span></p>
+        </footer>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+    
+    <script>
+        // Coordenadas para zona rural al norte de Santa Cruz, Bolivia (área agrícola)
+        const ruralSantaCruzCoords = [-17.55, -62.85]; // Zona agrícola norte
+        
+        // Inicializar el mapa centrado en zona rural
+        const map = L.map('map').setView(ruralSantaCruzCoords, 13);
+        
+        // Añadir capa de mapa satelital para mejor visualización de áreas rurales
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'
+        }).addTo(map);
+        
+        // Definir área agrícola más grande y realista
+        const agriculturalArea = L.polygon([
+            [-17.53, -62.82],
+            [-17.52, -62.80],
+            [-17.55, -62.78],
+            [-17.57, -62.81],
+            [-17.56, -62.84],
+            [-17.54, -62.85]
+        ], {
+            color: '#2d572c',
+            fillColor: '#4caf50',
+            fillOpacity: 0.6,
+            weight: 2
+        }).addTo(map);
+        
+        // Añadir áreas de bosque/vegetación alrededor
+        const forestArea1 = L.polygon([
+            [-17.51, -62.83],
+            [-17.52, -62.81],
+            [-17.53, -62.82],
+            [-17.52, -62.84]
+        ], {
+            color: '#1b5e20',
+            fillColor: '#2d572c',
+            fillOpacity: 0.7,
+            weight: 1
+        }).addTo(map);
+        
+        const forestArea2 = L.polygon([
+            [-17.58, -62.79],
+            [-17.57, -62.77],
+            [-17.59, -62.76],
+            [-17.60, -62.78]
+        ], {
+            color: '#1b5e20',
+            fillColor: '#2d572c',
+            fillOpacity: 0.7,
+            weight: 1
+        }).addTo(map);
+        
+        // Añadir caminos rurales
+        const ruralRoad1 = L.polyline([
+            [-17.54, -62.86],
+            [-17.53, -62.83],
+            [-17.55, -62.80],
+            [-17.56, -62.78]
+        ], {
+            color: '#8b4513',
+            weight: 3,
+            opacity: 0.8
+        }).addTo(map);
+        
+        const ruralRoad2 = L.polyline([
+            [-17.52, -62.85],
+            [-17.54, -62.83],
+            [-17.56, -62.82],
+            [-17.57, -62.84]
+        ], {
+            color: '#8b4513',
+            weight: 3,
+            opacity: 0.8
+        }).addTo(map);
+        
+        // Añadir marcadores para sensores en el campo
+        const sensor1 = L.marker([-17.54, -62.83]).addTo(map)
+            .bindPopup('<b>Sensor 1 - Estación Central</b><br>Temperatura/Humedad<br>Estado: Activo');
+        
+        const sensor2 = L.marker([-17.55, -62.81]).addTo(map)
+            .bindPopup('<b>Sensor 2 - Zona de Cultivos</b><br>Suelo/Viento<br>Estado: Activo');
+        
+        const sensor3 = L.marker([-17.56, -62.84]).addTo(map)
+            .bindPopup('<b>Sensor 3 - Borde del Campo</b><br>Temperatura/Humedad<br>Estado: Activo');
+        
+        // Datos de ejemplo para el pronóstico (adaptados para zona rural)
+        const forecastData = [
+            { day: "Hoy", temp: 27, condition: "Soleado", icon: "sun" },
+            { day: "Mañana", temp: 28, condition: "Parcialmente nublado", icon: "cloud-sun" },
+            { day: "Miér", temp: 25, condition: "Lluvias ligeras", icon: "cloud-rain" },
+            { day: "Jue", temp: 22, condition: "Tormentas eléctricas", icon: "bolt" },
+            { day: "Vie", temp: 26, condition: "Soleado", icon: "sun" },
+            { day: "Sáb", temp: 29, condition: "Muy caluroso", icon: "temperature-high" },
+            { day: "Dom", temp: 30, condition: "Extremo calor", icon: "temperature-high" }
+        ];
+        
+        // Iconos para condiciones climáticas (sin fa-poo-storm)
+        const conditionIcons = {
+            "sun": "fas fa-sun",
+            "cloud-sun": "fas fa-cloud-sun",
+            "cloud-rain": "fas fa-cloud-rain",
+            "bolt": "fas fa-bolt",
+            "temperature-high": "fas fa-thermometer-full"
+        };
+        
+        // Renderizar pronóstico
+        const forecastContainer = document.getElementById('forecast-container');
+        forecastData.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'forecast-day';
+            dayElement.innerHTML = `
+                <div class="day-name">${day.day}</div>
+                <div class="forecast-icon"><i class="${conditionIcons[day.icon]}"></i></div>
+                <div class="forecast-temp">${day.temp}°</div>
+                <div class="forecast-condition">${day.condition}</div>
+            `;
+            forecastContainer.appendChild(dayElement);
+        });
+        
+        // Variables para datos actuales (inicializados para zona rural)
+        let temperature = 26.8;
+        let airHumidity = 58;
+        let soilHumidity = 47;
+        let windSpeed = 15;
+        
+        // Variable para controlar si ya mostramos la primera actualización
+        let firstUpdate = true;
+        
+        // Función para actualizar datos de sensores
+        function updateSensorData() {
+            // Simular variaciones en los datos (más realistas para zona rural)
+            // Aumentamos la variación para que sea más notorio el cambio cada 10 segundos
+            temperature = parseFloat((temperature + (Math.random() - 0.5) * 2.0).toFixed(1));
+            airHumidity = Math.max(35, Math.min(85, airHumidity + (Math.random() - 0.5) * 6));
+            soilHumidity = Math.max(25, Math.min(75, soilHumidity + (Math.random() - 0.5) * 3));
+            windSpeed = Math.max(5, Math.min(35, windSpeed + (Math.random() - 0.5) * 4));
+            
+            console.log("Actualizando datos:", {temperature, airHumidity, soilHumidity, windSpeed});
+            
+            // Actualizar valores en la interfaz
+            document.getElementById('temperature').textContent = temperature.toFixed(1);
+            document.getElementById('air-humidity').textContent = Math.round(airHumidity);
+            document.getElementById('soil-humidity').textContent = Math.round(soilHumidity);
+            document.getElementById('wind-speed').textContent = Math.round(windSpeed);
+            
+            // Actualizar fecha y hora
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('last-update').textContent = formattedDate;
+            
+            // Verificar alertas
+            checkAlerts();
+            
+            // Solo para debugging - mostrar en consola que se actualizó
+            if (firstUpdate) {
+                console.log("Primera actualización completada. Las próximas serán cada 10 segundos.");
+                firstUpdate = false;
+            }
+        }
+        
+        // Función para verificar y mostrar alertas
+        function checkAlerts() {
+            const alertContainer = document.getElementById('alert-container');
+            
+            // Limpiar alertas anteriores
+            alertContainer.innerHTML = '';
+            
+            // Verificar condiciones para alertas
+            let alerts = [];
+            
+            // Alerta por alta temperatura (riesgo de incendio) - más sensible en zona rural
+            if (temperature > 32) {
+                alerts.push({
+                    type: "fire",
+                    title: "ALERTA POR ALTA TEMPERATURA",
+                    message: `Temperatura actual: ${temperature.toFixed(1)}°C. Riesgo elevado de incendio forestal. Se recomienda máxima vigilancia, evitar quemas y preparar sistemas de riego.`,
+                    icon: "fas fa-fire"
+                });
+            }
+            
+            // Alerta por tormentas en el pronóstico
+            if (forecastData.some(day => day.condition.includes("Tormenta"))) {
+                alerts.push({
+                    type: "storm",
+                    title: "ALERTA POR TORMENTAS ELÉCTRICAS",
+                    message: "Pronóstico indica tormentas eléctricas para mañana. Podrían dañar cultivos, equipos y generar cortes eléctricos. Desconectar equipos sensibles y asegurar estructuras.",
+                    icon: "⚡"
+                });
+            }
+            
+            // Alerta por lluvias intensas
+            if (forecastData.some(day => day.condition.includes("Lluvia") && day.temp < 25)) {
+                alerts.push({
+                    type: "rain",
+                    title: "ALERTA POR LLUVIAS INTENSAS",
+                    message: "Se pronostican lluvias que podrían causar encharcamientos y afectar la humedad del suelo. Verificar sistemas de drenaje y proteger cultivos sensibles a exceso de agua.",
+                    icon: "fas fa-cloud-showers-heavy"
+                });
+            }
+            
+            // Alerta por baja humedad del suelo
+            if (soilHumidity < 35) {
+                alerts.push({
+                    type: "fire",
+                    title: "ALERTA POR SEQUÍA EN SUELO",
+                    message: `Humedad del suelo: ${Math.round(soilHumidity)}% (Nivel crítico). Se recomienda activar sistemas de riego inmediatamente para evitar pérdidas en cultivos.`,
+                    icon: "fas fa-temperature-high"
+                });
+            }
+            
+            // Alerta por vientos fuertes (más peligroso en campo abierto)
+            if (windSpeed > 20) {
+                alerts.push({
+                    type: "storm",
+                    title: "ALERTA POR VIENTOS FUERTES",
+                    message: `Velocidad del viento: ${Math.round(windSpeed)} km/h. Puede dañar cultivos frágiles, estructuras y causar erosión del suelo. Asegurar invernaderos y estructuras ligeras.`,
+                    icon: "fas fa-wind"
+                });
+            }
+            
+            // Alerta por calor extremo en pronóstico
+            if (forecastData.some(day => day.temp > 32)) {
+                alerts.push({
+                    type: "fire",
+                    title: "PRONÓSTICO DE CALOR EXTREMO",
+                    message: "Se pronostican temperaturas superiores a 32°C en los próximos días. Esto puede afectar el crecimiento de cultivos, aumentar evaporación y riesgo de incendios forestales.",
+                    icon: "fas fa-sun"
+                });
+            }
+            
+            // Mostrar alertas si existen
+            if (alerts.length > 0) {
+                alerts.forEach(alert => {
+                    const alertElement = document.createElement('div');
+                    alertElement.className = `alert-container ${alert.type}-alert`;
+                    alertElement.innerHTML = `
+                        <div class="alert-header">
+                            <div class="alert-icon">${alert.icon}</div>
+                            <div class="alert-title">${alert.title}</div>
+                        </div>
+                        <div class="alert-message">${alert.message}</div>
+                    `;
+                    alertContainer.appendChild(alertElement);
+                });
+            } else {
+                // Si no hay alertas, mostrar mensaje
+                const noAlertsElement = document.createElement('div');
+                noAlertsElement.className = 'no-alerts';
+                noAlertsElement.innerHTML = `
+                    <i class="fas fa-check-circle" style="font-size: 2rem; color: #4caf50; margin-bottom: 10px;"></i>
+                    <p>No hay alertas activas en este momento. Las condiciones climáticas son favorables para los cultivos.</p>
+                `;
+                alertContainer.appendChild(noAlertsElement);
+            }
+        }
+        
+        // Inicializar datos y alertas inmediatamente
+        updateSensorData();
+        
+        // Actualizar datos cada 10 segundos (10000 milisegundos)
+        setInterval(updateSensorData, 10000);
+        
+        // Añadir leyenda al mapa
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = `
+                <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Leyenda:</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #4caf50; margin-right: 5px;"></span>Área de cultivos</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #2d572c; margin-right: 5px;"></span>Bosque/Vegetación</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #8b4513; margin-right: 5px;"></span>Caminos rurales</div>
+                    <div><i class="fas fa-map-marker" style="color: red; margin-right: 5px;"></i>Sensores</div>
+                </div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+        
+        // Mostrar mensaje inicial en consola
+        console.log("Sistema de monitoreo iniciado. Los datos se actualizarán cada 10 segundos.");
+    </script>
+</body>
+</html>
